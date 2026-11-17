@@ -307,6 +307,22 @@ body.cv{overflow:hidden}
 .vp i{position:relative;width:84px;height:84px;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.5),var(--gold) 40%,#7a4a10);box-shadow:0 0 50px rgba(232,180,85,.6);animation:hal 3s ease-in-out infinite}
 .vp i::after{content:'';position:absolute;left:50%;top:50%;margin:-14px 0 0 -9px;border-left:26px solid #150f33;border-top:14px solid transparent;border-bottom:14px solid transparent}
 .vl{display:inline-block;margin-top:.9rem;color:var(--gold);text-decoration:none;font-weight:600}.vl:hover{text-decoration:underline}
+/* Video: optimizado para móvil */
+@keyframes vidin{from{opacity:0}}
+.on .vid.rv{animation:vidin .6s calc(var(--i,0)*90ms + 150ms) ease backwards}
+.vf{isolation:isolate;-webkit-transform:translateZ(0);transform:translateZ(0);max-width:100%}
+.vf iframe{border-radius:inherit;background:#000}
+.vp{height:100%;padding:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.vp:focus-visible{outline:2px solid var(--gold);outline-offset:-6px}
+@supports not (aspect-ratio:16/9){.vf{height:0;padding-bottom:56.25%}}
+@media(max-width:820px){
+.vid{margin-top:1.8rem}.vid h3{font-size:1.35rem}.vsub{font-size:.95rem;margin-bottom:1rem}
+.vf{border-radius:16px;box-shadow:0 0 0 1px var(--line),0 12px 28px rgba(0,0,0,.45)}
+.vp{gap:.6rem;font-size:.95rem}
+.vp i{width:64px;height:64px;box-shadow:0 0 24px rgba(232,180,85,.55)}
+.vp i::after{margin:-11px 0 0 -7px;border-left:20px solid #150f33;border-top:11px solid transparent;border-bottom:11px solid transparent}
+.vl{margin-top:.7rem;padding:.5rem .8rem}
+}
 .stairs{margin:1.5rem auto 1rem;justify-content:center}#aft{text-align:center;margin-inline:auto}
 </style>
 </head>
@@ -485,7 +501,7 @@ var lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttr
 ur=gl.getUniformLocation(pr,"r");ut=gl.getUniformLocation(pr,"t");um=gl.getUniformLocation(pr,"m");uc=gl.getUniformLocation(pr,"tn");
 var sc=mob?.5:.7;function rs(){sh.width=Math.max(2,innerWidth*sc|0);sh.height=Math.max(2,innerHeight*sc|0);gl.viewport(0,0,sh.width,sh.height);draw(0)}
 rs();addEventListener("resize",rs);
-(function fr(ts){draw(ts);if(!RM)requestAnimationFrame(fr)})(0);
+(function fr(ts){if(!(vpl&&mob))draw(ts);if(!RM)requestAnimationFrame(fr)})(0);
 }else document.body.style.background="radial-gradient(circle at 30% 20%,#4a2a8a,#0a0820 70%)";
 
 /* Partículas y destellos */
@@ -493,7 +509,7 @@ var pa=E("pa"),cx=pa.getContext("2d"),P=[],B=[],W,H;
 function rp(){var d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;pa.width=W*d;pa.height=H*d;cx.setTransform(d,0,0,d,0,0);P=[];for(var i=0;i<(mob?38:85);i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:-.1-Math.random()*.35,r:.8+Math.random()*2,g:Math.random()<.35})}
 rp();addEventListener("resize",rp);
 function burst(x,y){if(RM)return;for(var i=0;i<46;i++){var a=Math.random()*6.3,s=1.5+Math.random()*4.5;B.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1.5,l:1,c:i%3?"232,180,85":"55,194,184"})}}
-function dp(){cx.clearRect(0,0,W,H);var L2=mob?90:120;
+function dp(){if(vpl&&mob){if(!RM)requestAnimationFrame(dp);return}cx.clearRect(0,0,W,H);var L2=mob?90:120;
 for(var i=0;i<P.length;i++){var a=P[i];a.x+=a.vx+(mx-.5)*.3;a.y+=a.vy;if(a.y<-10){a.y=H+10;a.x=Math.random()*W}if(a.x<-10)a.x=W+10;if(a.x>W+10)a.x=-10;
 for(var j=i+1;j<P.length;j++){var c=P[j],dx=a.x-c.x,dy=a.y-c.y,d=dx*dx+dy*dy;if(d<L2*L2){cx.strokeStyle="rgba(232,180,85,"+.18*(1-Math.sqrt(d)/L2)+")";cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(c.x,c.y);cx.stroke()}}
 cx.fillStyle=a.g?"rgba(232,180,85,.9)":"rgba(200,180,255,.6)";cx.beginPath();cx.arc(a.x,a.y,a.r,0,6.3);cx.fill()}
@@ -786,7 +802,12 @@ MV.length=0;fr.forEach(function(i){MV.push(BK[i])})}
 Q.addEventListener('click',function(e){if(e.target.id=='mvr'){pickMV();mi=0;mc=0;mq()}});
 pickMV();mi=0;mc=0;mq();
 /* Video de la biografía */
-E('vplay').onclick=function(){E('vf').innerHTML=`<iframe src='https://drive.google.com/file/d/1_n-4SND21Z_Im3o9LJoyuAZRtK2mBsaM/preview' title='Video sobre la dialéctica de Hegel' allow='autoplay; encrypted-media; picture-in-picture; fullscreen' allowfullscreen></iframe>`};
+var vpl=false,vfp=E('vf').innerHTML;
+function vstop(){if(!vpl)return;vpl=false;E('vf').innerHTML=vfp}
+E('vf').addEventListener('click',function(e){if(vpl||!e.target.closest('#vplay'))return;vpl=true;
+var f=document.createElement('iframe');f.src='https://drive.google.com/file/d/1_n-4SND21Z_Im3o9LJoyuAZRtK2mBsaM/preview';f.title='Video sobre la dialéctica de Hegel';f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.setAttribute('allowfullscreen','');
+E('vf').innerHTML='';E('vf').appendChild(f)});
+addEventListener('hashchange',vstop);
 /* Inclinación 3D de las tarjetas */
 document.querySelectorAll('.portal').forEach(function(p){p.addEventListener('pointermove',function(e){if(e.pointerType=='touch')return;var r=p.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;p.style.setProperty('--ry',(x-.5)*14+'deg');p.style.setProperty('--rx',(.5-y)*14+'deg');p.style.setProperty('--mx',x*100+'%');p.style.setProperty('--my',y*100+'%')});p.addEventListener('pointerleave',function(){p.style.setProperty('--rx','0deg');p.style.setProperty('--ry','0deg')})});
 })();
